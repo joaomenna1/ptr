@@ -21,11 +21,19 @@ Matrix matrix_by_scalar_difference(Matrix matrix, double scalar,char *name);
 /* Returns the transposed matrix */
 Matrix matrix_transposed(Matrix matrix, char *name);
 /* Returns the determinant of the matrix. */
-double matrix_det(Matrix matrix);
+double matrix_determinant(Matrix matrix);
 /* Returns the inverse of the matrix. */
 Matrix matrix_inverse(Matrix matrix, char *name);
 /*Destroy the matrix.*/
 void matrix_delete(Matrix matrix);
 /* Print matrix in terminal */
 void printm(Matrix mat);
+/* returns An array of zeros. */
+Matrix matrix_empty(int a, int b,char *name);
+/*Matrix Coafactor*/
+double matrix_cofactor(Matrix matrix, int a, int b);
+/**/
+Matrix matrix_sup(Matrix mat, int a, int b, char *name);
+/*Allows the user to insert data into the array*/
+Matrix matrix_insert();
 #endif

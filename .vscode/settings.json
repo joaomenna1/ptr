@@ -1,7 +1,8 @@
 {
     "files.associations": {
         "dstring.h": "c",
-        "stdio.h": "c"
+        "stdio.h": "c",
+        "matrix.h": "c"
     },
 
     "explorer.compactFolders": false
