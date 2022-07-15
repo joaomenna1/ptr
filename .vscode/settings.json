@@ -1,0 +1,6 @@
+{
+    "files.associations": {
+        "dstring.h": "c",
+        "stdio.h": "c"
+    }
+}
