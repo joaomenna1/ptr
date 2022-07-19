@@ -27,13 +27,17 @@ Matrix matrix_inverse(Matrix matrix, char *name);
 /*Destroy the matrix.*/
 void matrix_delete(Matrix matrix);
 /* Print matrix in terminal */
-void printm(Matrix mat);
+void printm(Matrix matrix);
 /* returns An array of zeros. */
 Matrix matrix_empty(int a, int b,char *name);
-/*Matrix Coafactor*/
-double matrix_cofactor(Matrix matrix, int a, int b);
-/**/
-Matrix matrix_sup(Matrix mat, int a, int b, char *name);
+/*Returns the cofactor associated with the ab element of the array*/
+double matrix_cofactor_by_associated_a_matrix(Matrix matrix, int a, int b);
+/*Returns the cofactor matrix*/
+Matrix matrix_cofactor(Matrix matrix);
+/*One returns a row and a column defined as arrays.*/
+Matrix matrix_minor_complementary(Matrix matrix, int a, int b, char *name);
 /*Allows the user to insert data into the array*/
 Matrix matrix_insert();
+/*returns a adjacent array*/
+Matrix matrix_adjacent(Matrix matrix);
 #endif

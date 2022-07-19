@@ -8,6 +8,7 @@ struct dstring {
 };
 
 dstring new_string(char *string) {
+
     if (string == NULL) {
         return NULL;
     }
@@ -29,12 +30,14 @@ dstring new_string(char *string) {
 }
 
 dstring string_copy(dstring str) {
+
     dstring copy = new_string(str->string);
 
     return copy;
 }
 
 dstring string_concat(dstring str1, dstring str2) {
+
     int size = str1->size + str2->size;
 
     dstring newString = string_copy(str1);
@@ -50,6 +53,7 @@ dstring string_concat(dstring str1, dstring str2) {
 }
 
 char *string_buffer(dstring string) {
+
     char *buffer = malloc(sizeof(char) * string->size);
     for (int i = 0; i < string->size; i++) {
         buffer[i] = string->string[i];
@@ -59,6 +63,7 @@ char *string_buffer(dstring string) {
 }
 
 void string_print(dstring string) {
+
     for (int i = 0; i < string->size; i++) {
         printf("%c", string->string[i]);
     }
@@ -67,15 +72,17 @@ void string_print(dstring string) {
 }
 
 void string_free(dstring string) {
-    free(string);
 
+    free(string);
 }
 
 int string_lenght(dstring string) {
+
     return string->size;
 }
 
 int cstring_lenght(char *string) {
+    
     int size;
     for (size = 0; string[size] != '\0'; size++);
     return size;
