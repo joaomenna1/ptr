@@ -119,13 +119,11 @@ Matrix matrix_transposed(Matrix matrix, char *name) {
 
 double matrix_determinant(Matrix matrix) {
 
-     if (matrix->a != matrix->b)
-    {
+     if (matrix->a != matrix->b) {
         printf("The matrix must be square\n");
         exit(1);
     }
-    else if (matrix->a >= 5)
-    {
+    else if (matrix->a >= 5) {
         printf("This function is limited to calculating the determinant of a 4x4 matrix.\n");
         exit(1);
     }
@@ -153,7 +151,7 @@ double matrix_determinant(Matrix matrix) {
             default:
              // Teorema de Laplace
              for (int i = 0; i < matrix->a; i++)
-                determinant += matrix->data[0][i] * matrix_cofactor(matrix, 0, i);
+                determinant += matrix->data[0][i] * matrix_cofactor_by_associated_a_matrix(matrix, 0, i);
                 break;
                 return determinant;
         }
