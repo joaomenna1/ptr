@@ -34,36 +34,14 @@ void open_menu();
 /*Functions that ask the user to enter data through scanf()
   I don't know if it will be necessary, this functions hahahah!  
 */
-
+void operation_string();
 int setLines();
 int setColumns();
 char *setNameMatrix();
 double setScalar();
 
 int main() {
-    Matrix matrix1 = NULL;
-    Matrix matrix2 = NULL;
-    int a, b;
-
-    while (1)
-    {
-        open_menu();
-        switch (menu_option) {
-            case EXIT_PROGRAMN:
-                exit(0);
-            break;
-
-            case DO_MAKE_ADT_STRING:
-                adt_string();
-            break;        
-
-            default:
-                printf("Insert options invalidate");
-                break;
-        }
-    }
-    
-  
+    operation_string();
 }
 
 
@@ -98,8 +76,8 @@ double setScalar() {
     return scalar;
 }
 
-void adt_string() {
-      printf("\n [ADT STRINGS] -Welcome to the jungle - [lab 1] Programing Real Time\n");
+void operation_string() {
+    printf("\n [ADT STRINGS] -Welcome to the jungle - [lab 1] Programing Real Time\n");
     printf("\nCreated 2 strings...\n");
     dstring str1 = new_string("first");
     dstring str2 = new_string("second");
