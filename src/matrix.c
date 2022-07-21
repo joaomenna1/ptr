@@ -1,315 +1,437 @@
-#include <stdlib.h>
 #include <stdio.h>
-#include "matrix.h"
+#include <stdlib.h>
+#include <stdbool.h>
+#include <math.h>
 
-struct Matrix {
-    int a, b;
-    double **data;
-    char *name;
-};
+typedef struct Matrix
+{
+	float M[20][20];
+	int line;
+	int row;
+}matriz;
 
-Matrix matrix_empty(int a, int b, char *name) {
 
-    Matrix new_matrix = malloc(sizeof(Matrix));
+matriz* aloca(int i, int j)
+{
+	matriz *m = malloc(sizeof(matriz));
+	m->line = i;
+	m->row = j;
 
-    new_matrix = calloc(a, sizeof(double *));
-
-    for (int i =0; i < a; i++) {
-        new_matrix->data[i] = calloc(b,sizeof(double));
-    }
-
-    new_matrix->a = a;
-    new_matrix->b = b;
-    return new_matrix;
+	return m;
 }
 
-Matrix matrix_sum(Matrix matrix1, Matrix matrix2, char *name) {
-    
-    if (matrix1->a == matrix2->a && matrix1->b == matrix2->b) {
-        Matrix new_matrix = matrix_empty(matrix1->a, matrix1->b, name);
-        for (int i = 0; i < new_matrix->a; i++) {
-            for (int j = 0; j < new_matrix->b; j++ ) {
-                new_matrix->data[i][j] = matrix1->data[i][j] + matrix2->data[i][j];
-            }
-        }
-        return new_matrix;
-    }else {
-        printf("Matrix should have same dimensions");
-        return NULL;
-    }
+
+matriz* transposta(matriz* A)
+{
+	matriz* m = aloca(A->line, A->row);
+
+	for (int i = 0; i < A->line; i++)
+		for (int j = 0; j < A->row; j++)
+			m->M[i][j] = A->M[j][i];
+
+	return m;
 }
 
-Matrix matrix_difference(Matrix matrix1, Matrix matrix2, char *name) {
+matriz* reduz(matriz* m, int l, int r)
+{
+	matriz* A = aloca(m->line - 1, m->row - 1);
 
-    if (matrix1->a == matrix2->a && matrix1->b == matrix2->b) {
-        Matrix new_matrix = matrix_empty(matrix1->a, matrix1->b, name);
-        for (int i = 0; i < new_matrix->a; i++) {
-            for (int j = 0; j < new_matrix->b; j++ ) {
-                new_matrix->data[i][j] = matrix1->data[i][j] - matrix2->data[i][j];
-            }
-        }
-        return new_matrix;
-    }else {
-        printf("Matrix should have same dimensions");
-        return NULL;
-    }
+
+	int varx, vary;
+	varx = vary = 0;
+
+	for (int i = 0; i < A->line; i++)
+		for (int j = 0; j < A->row; j++)
+		{
+			if (l == i)
+				varx = 1;
+
+			if (r == j)
+				vary = 1;
+
+			A->M[i][j] = m->M[i+varx][j+vary];
+		}
+
+	return A;
 }
 
-Matrix matrix_product(Matrix matrix1, Matrix matrix2, char *name) {
-     if (matrix1->a == matrix2->a && matrix1->b == matrix2->b) {
-        Matrix new_matrix = matrix_empty(matrix1->a, matrix1->b, name);
-        for (int i = 0; i < new_matrix->a; i++) {
-            for (int j = 0; j < new_matrix->b; j++ ) {
-                for (int k = 0; j < matrix2->a; k++) {
-                    new_matrix->data[i][j] += matrix1->data[i][j] * matrix2->data[k][j];
-                }
-            }
-        }
-        return new_matrix;
-    }else {
-        printf("Matrix should have same dimensions");
-    }
-        return NULL;
+matriz* determinante(matriz* m, int tam)
+{	
+	if (tam = 1)
+		return m;
+	
+	if(tam = 2)
+	{
+		matriz* new = aloca(1,1);
+		new->M[0][0] = (m->M[0][0] * m->M[1][1] - m->M[0][1] * m->M[1][0]);
+		return new;
+	}
+
+	matriz* B;
+	if (tam > 3)
+	{
+		int soma = 0;
+		for (int i = 0; i < m->line; i++)
+		{
+			for (int j = 0; j < m->row; j++)
+			{
+				B = reduz(m, i, j);
+				soma = soma + pow(-1, i+j) * determinante(B, B->line)->M[0][0];
+			}
+		}
+		free (B);
+		matriz* A = aloca(1,1);
+		A->M[0][0] = soma;
+		return A;
+	}
+	
+	float d;
+	float D = 0;
+	tam = m->line;
+
+	for (int a = 0; a < tam; a++)
+	{
+		d = m->M[a][0];
+		for(int j = 1; j < tam; j++)
+		{
+			if (a + j < tam)
+				d = d + d*m->M[a+j][j];
+			else
+				d = d + d*m->M[a+j-tam][j];
+		}
+	}
+	D = D + d;
+
+	for (int a = 0; a < tam; a++)
+	{
+		d = m->M[a][tam];
+		for(int j = tam-1; j >= 0; j--)
+			d = d + d*m->M[tam-j][j];
+	}
+	D = D + d;
+
+	matriz* new = aloca(1, 1);
+	new->M[0][0] = D;
+	return new;
 }
 
-Matrix matrix_by_scalar_sum(Matrix matrix, double scalar, char *name) {
+matriz* adicao(matriz* A, matriz* B, bool x)
+{	
+	matriz* m = aloca(A->line, A->row);
 
-    Matrix new_matrix = matrix_empty(matrix->a, matrix->b, name);
-    for (int i = 0 ; i < matrix->a; i++) {
-        for (int j = 0; j < matrix->b; j++) {
-            new_matrix->data[i][j] = scalar + matrix->data[i][j];
-        }
-    }
-    return new_matrix;
+	for(int i = 0; i < A->line; i++)
+		for (int j = 0; j < A->row; j++)
+			if(x == 0)
+				m->M[i][j] = A->M[i][j] + B->M[i][j];
+			else
+				m->M[i][j] = A->M[i][j] - B->M[i][j];
+
+	return m;
 }
 
-Matrix matrix_by_scalar_product(Matrix matrix, double scalar, char *name) {
 
-    Matrix new_matrix = matrix_empty(matrix->a, matrix->b, name);
-    for (int i = 0; i < matrix->a; i++) {
-        for (int j = 0; j < matrix->b; j++) {
-            new_matrix->data[i][j] = matrix->data[i][j] * scalar;
-        }
-    
-    }
-    return new_matrix;
+matriz* multiplica(matriz* A, matriz* B)
+{
+	if(A->row != B->line)
+		return NULL;
+
+
+	matriz* m = aloca(A->line, B->row);
+
+
+	for (int i = 0; i < B->row; i++)
+	{
+		int soma = 0;
+		for (int j = 0; j < B->row; j++)
+		{
+			for (int x = 0; x < B->line; x++)
+				soma = soma + A->M[i][x] * B->M[x][j];
+			m->M[i][j] = soma;
+		}
+	}
+
+	return m;
 }
 
-Matrix matrix_by_scalar_difference(Matrix matrix, double scalar,char *name) {
+matriz* adicaoescalar(matriz* A, float escalar, bool x)
+{
+	matriz* m = aloca(A->line, A->row);
 
-  Matrix new_matrix = matrix_empty(matrix->a, matrix->b, name);
-    for (int i = 0; i < matrix->a; i++) {
-        for (int j = 0; j < matrix->b; j++) {
-            new_matrix->data[i][j] = matrix->data[i][j] - scalar;
-        }
-    }
-    return new_matrix;
+	for (int i = 0; i < A->line; i++)
+		for (int j = 0; j < A->row; j++)
+			if (x == 0)
+				m->M[i][j] = A->M[i][j] + escalar;
+			else
+				m->M[i][j] = A->M[i][j] - escalar;
+
+	return m;
 }
 
-Matrix matrix_transposed(Matrix matrix, char *name) {
+matriz* multiplicaescalar(matriz* A, float escalar)
+{
+	matriz* m = aloca(A->line, A->row);
 
-    Matrix new_matrix = matrix_empty(matrix->a, matrix->b, name);
-    for (int i = 0; i < matrix->a; i++) {
-        for (int j = 0; j < matrix->b; j++) {
-            new_matrix->data[j][i] = matrix->data[i][j];
-        }
-    }
-    return new_matrix;
+	for (int i = 0; i < A->line; i++)
+		for (int j = 0; j < A->row; j++)
+			m->M[i][j] = A->M[i][j] * escalar;
 }
 
-double matrix_determinant(Matrix matrix) {
+matriz* inversao(matriz* m)
+{
+	float D = determinante(m, m->line)->M[0][0];
+	matriz* A = aloca(m->line, m->row);
 
-     if (matrix->a != matrix->b) {
-        printf("The matrix must be square\n");
-        exit(1);
-    }
-    else if (matrix->a >= 5) {
-        printf("This function is limited to calculating the determinant of a 4x4 matrix.\n");
-        exit(1);
-    }
-    else {
-        double determinant = 0;
-        switch (matrix->a) {
-            case 1:
-                determinant = matrix->data[0][0];
-                return determinant;
-                break;
-            case 2:
-                determinant = matrix->data[0][0] * matrix->data[1][1] - matrix->data[1][0] * matrix->data[0][1];
-                return determinant;
-                break;
-            case 3:
-            //Sarrus
-                determinant = matrix->data[0][0] * matrix->data[1][1] * matrix->data[2][2] 
-                    + matrix->data[0][1] * matrix->data[1][2] * matrix->data[2][0]
-                    + matrix->data[2][1] * matrix->data[1][0] * matrix->data[0][2] 
-                    - matrix->data[2][0] * matrix->data[1][1] * matrix->data[0][2] 
-                    - matrix->data[1][0] * matrix->data[0][1] * matrix->data[2][2] 
-                    - matrix->data[2][1] * matrix->data[1][2] * matrix->data[0][0];
-                return determinant;
-                break;
-            default:
-             // Teorema de Laplace
-             for (int i = 0; i < matrix->a; i++)
-                determinant += matrix->data[0][i] * matrix_cofactor_by_associated_a_matrix(matrix, 0, i);
-                break;
-                return determinant;
-        }
-    }
+	for (int i = 0; i < m->line; i++)
+		for (int j = 0; j < m->row; j++)
+			A->M[i][j] = pow(-1, i + j) * determinante(reduz(m, i, j), m->line - 1)->M[0][0];
+
+	A = transposta(A);
+
+	A = multiplicaescalar(A, 1/D);
+
+	return A;
+}
+
+matriz* lematriz(int x, int y)
+{
+	matriz* A = aloca(x, y);
+	float valor;
+
+	for (int i = 0; i < x; i++)
+		for (int j = 0; j < y; j++)
+		{
+			scanf("%f", &valor);
+			A->M[i][j] = valor;
+		}
+
+	printf("\n\n");
+	return A;
+}
+
+void printamatriz(matriz* A)
+{
+	for (int i = 0; i < A->line; i++)
+	{
+		for (int j = 0; j < A->row; j++)
+			printf("%.2f ", A->M[i][j]);
+
+		printf("\n");
+	}
+}
+
+matriz* adsub(bool operacao)
+{
+	matriz *A, *B;
+	int x, y;
+	printf("Número de linhas das Matrizes: ");
+	scanf("%d", &x);
+	printf("Número de colunas das Matrizes: ");
+	scanf("%d", &y);
+	if(x < 1 || y < 1)
+	{
+		printf("Inválido");
+		return NULL;
+	}
+	printf("Insira a Matriz 1:\n");
+	A = lematriz(x, y);
+	printf("Insira a Matriz 2:\n");
+	B = lematriz(x, y);
+
+	return adicao(A, B, operacao);
+}
+
+matriz* mult()
+{
+	matriz *A, *B;
+	int x, y;
+	printf("Número de linhas da Matriz A: ");
+	scanf("%d", &x);
+	printf("Número de colunas das Matriz A: ");
+	scanf("%d", &y);
+	if(x < 1 || y < 1)
+	{
+		printf("Inválido");
+		return NULL;
+	}
+	printf("Insira a Matriz 1:\n");
+	A = lematriz(x, y);
+	printf("Número de colunas das Matriz B: ");
+	scanf("%d", &y);
+	B = lematriz(x, y);
+
+	return multiplica(A, B);
+}
+
+matriz* escalar(int a)
+{
+	matriz* A;
+	int x, y;
+	float esc;
+	printf("Número de linhas das Matrizes: ");
+	scanf("%d", &x);
+	printf("Número de colunas das Matrizes: ");
+	scanf("%d", &y);
+	if(x < 1 || y < 1)
+	{
+		printf("Inválido");
+		return NULL;
+	}
+
+	printf("\nInforme o escalar: ");
+	scanf("%f", &esc);
+
+	switch (a)
+	{
+		case 1:
+			return adicaoescalar(A, esc, 0);
+
+		case 2:
+			return adicaoescalar(A, esc, 1);
+
+		case 3:
+			return multiplicaescalar(A, esc);
+	}
 
 }
 
-double matrix_cofactor_by_associated_a_matrix(Matrix matrix, int a, int b) {
+matriz* transpinversa(int a)
+{
+	matriz* A;
+	int x, y;
+	float esc;
+	printf("Número de linhas das Matrizes: ");
+	scanf("%d", &x);
+	printf("Número de colunas das Matrizes: ");
+	scanf("%d", &y);
+	if(x < 1 || y < 1)
+	{
+		printf("Inválido");
+		return NULL;
+	}
 
-    if (a > matrix->a || b > matrix->b) {
-        printf("Cofactor addressing exceeds array size.\n");
-        exit(1);
-    } else if (matrix->a != matrix->b) {
-        printf("The matrix must be square.\n");
-        exit(1);
-    } else if (matrix->a >= 5) {
-        printf("This function is limited to the calculation of cofactors of a 4x4 matrix.\n");
-        exit(1);
-    } else {
-        //main minor
-        Matrix new_matrix = matrix_minor_complementary(matrix, a, b, "cofactor\n");
-        //result determinant
-        double det = matrix_determinant(new_matrix);
-        if ((a + b) % 2 != 0) //Multiply by -1 the values ​​where a+b are odd
-            det = -det;
-        //return coafactor
-        matrix_delete(new_matrix);
-        return det;
-    }
+	switch(a)
+	{
+		case 1:
+			return transposta(A);
+
+		case 2:
+			if(x == y)
+				return determinante(A, x);
+			return NULL;
+
+		case 3:
+			if(x == y)
+				return inversao(A);
+			return NULL;
+	}
 }
 
-void matrix_delete(Matrix matrix) {
+int main()
+{
+	bool loop = 1;
+	int opcao;
+	int x, y;
+	matriz* A;
 
-    for (int i = 0; i < matrix->a; i++) {
-        free(matrix->data[i]);
-    }
+	while (loop)
+	{
+		printf("1 - Somar matrizes;\n2 - Subtrair matrizes;\n3 - Multiplicar matrizes;\n4 - Somar matriz por escalar;\n");
+		printf("5 - Subtrair matriz por escalar;\n6 - Multiplicar matriz por escalar;\n7 - Matriz Transposta;\n");
+		printf("8 - Determinante;\n9 - Matriz Inversa;\n10 - Sair\n\nEscolha uma opção: ");
+		scanf("%d", &opcao);
+		fflush(stdin);
 
-    free(matrix->data);
-    free(matrix);
-}
+		switch(opcao)
+		{
+			case 1:
+				A = adsub(0);
+				if (A != NULL)
+				{
+					printamatriz(A);
+					free(A);
+				}
+				break;
 
-void printm(Matrix matrix) {
+			case 2:
+				A = adsub(1);
+				if (A != NULL)
+				{
+					printamatriz(A);
+					free(A);
+				}
+				break;
 
-    if (matrix == NULL) {
-        printf("Matrix null\n");
-        return;
-    }
+			case 3:
+				A = mult();
+				if (A != NULL)
+				{
+					printamatriz(A);
+					free(A);
+				}
+				break;
 
-    printf("%s\n", matrix->name);
-    for (int i = 0; i < matrix->a; i++) {
-        for (int j = 0; j < matrix->b; j++) {
-            printf("%.3lf  ", matrix->data[i][j]);
-        }
-        printf("\n");
-    }
+			case 4:
+				A = escalar(1);
+				if (A != NULL)
+				{
+					printamatriz(A);
+					free(A);
+				}
+				break;
 
-    printf("\n");
-}
+			case 5:
+				A = escalar(2);
+				if (A != NULL)
+				{
+					printamatriz(A);
+					free(A);
+				}
+				break;
 
-Matrix matrix_minor_complementary(Matrix matrix, int a, int b, char *name) {
+			case 6:
+				A = escalar(3);
+				if (A != NULL)
+				{
+					printamatriz(A);
+					free(A);
+				}
+				break;
 
-    if (a > matrix->a - 1 || b > matrix->b - 1)
-    {
-        printf("Values ​​passed exceed array bounds\n");
-        return NULL;
-    }
-    Matrix new_matrix = matrix_empty(matrix->a - 1, matrix->b - 1, name);
-    // aux_a e aux_b are triggers that fire when the counter passes through 
-    // line and columns removed
-    // They add the counter by one, removing a row or column
-    int aux_a = 0, aux_b = 0;
+			case 7:
+				A = transpinversa(1);
+				if (A != NULL)
+				{
+					printamatriz(A);
+					free(A);
+				}
+				break;
 
-    for (int i = 0; i < new_matrix->a; i++) {
-        if (i == a) aux_a = 1;
 
-        for (int j = 0; j < new_matrix->b; j++) {
+			case 8:
+				A = transpinversa(2);
+				if (A != NULL)
+				{
+					printf("O determinante eh: %.2f", &A->M[0][0]);
+					free(A);
+				}
+				break;
 
-            if (j >= b) aux_b = 1;
-            else
-                aux_b = 0;
-                new_matrix->data[i][j] = matrix->data[i + aux_a][j + aux_b];
-        }
-    }
 
-    return new_matrix;
-}
+			case 9:
+				A = transpinversa(3);
+				if (A != NULL)
+				{
+					printamatriz(A);
+					free(A);
+				}
+				break;
 
-Matrix matrix_insert() {
-    
-    int a = 0;
-    int b = 0;
-    char *name = malloc(sizeof(char));
+			case 10:
+				loop = 0;
+		}
 
-    printf("Insert the number of lines\n");
-    scanf("%d", &a);
-    printf("Insert the number of columns\n");
-    scanf("%d", &b);
-    printf("Insert the name matrix\n");
-    scanf("%s", name);
+		printf("\n\n");
+	}
 
-    if (a <= 0 || b <= 0){
-        printf("The array was not created. the number of rows or columns must be greater than zero.\n");
-        return NULL;
-    }
-
-    Matrix matrix = matrix_empty(a, b, name);
-
-    for (int i = 0; i < matrix->a; i++) {
-        for (int j = 0; j < matrix->b; j++) {
-            printf("Insert element line: %d, column: %d\n", i, j);
-            scanf("%lf", &matrix->data[i][j]);
-        }
-    }
-    printf("Matriz created success!\n");
-    //printm(matrix);
-    return matrix;
-}
-
-Matrix matrix_cofactor(Matrix matrix) {
-    
-    Matrix new_matrix = matrix_empty(matrix->a, matrix->b, matrix->name);
-
-    for (int i = 0; i < matrix->a; i++)
-    {
-        for (int j = 0; j < matrix->b; j++)
-        {
-            new_matrix->data[i][j] = matrix_cofactor_by_associated_a_matrix(matrix, i, j);
-        }
-    }
-
-    return new_matrix;
-}
-
-Matrix matrix_adjacent(Matrix matrix) {
-
-    Matrix new_mat = matrix_transposed(matrix_cofactor(matrix), matrix->name);
-    return new_mat;
-}
-
-Matrix matrix_inverse(Matrix matrix, char *name) {
-
-    double determinant = matrix_determinant(matrix);
-    
-    if (determinant == 0) {
-        printf("The inverse does not exist, the determinate is equal to zero\n");
-        return NULL;
-    }
-
-    Matrix new_matrix = matrix_adjacent(matrix);
-
-    new_matrix->name = name;
-
-    for (int i = 0; i < matrix->a; i++) {
-        for (int j = 0; j < matrix->b; j++) {
-
-            new_matrix->data[i][j] = new_matrix->data[i][j] / determinant;
-        }
-    }
-
-    return new_matrix;
+	return 0;
 }
