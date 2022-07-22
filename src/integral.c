@@ -1,7 +1,7 @@
+#include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
-#include <matriz.h>
 
 typedef struct fila
 {
@@ -14,7 +14,9 @@ funcao* aloca (float valor)
 	funcao* new = malloc(sizeof(funcao));
 
 	new->v = valor;
-	new->prox = NULL;
+	new->next = NULL;
+
+	return new;
 }
 
 funcao* add (funcao* f, float valor)
@@ -26,25 +28,26 @@ funcao* add (funcao* f, float valor)
 	return f;
 }
 
-float resposta (funcao* f, float valor)
+float resposta (funcao* f, float valor, int n)
 {
 	funcao* aux = f->next;
 	float soma = f->v;
-	int i = 1
+	int i = n;
 
 	while(aux != NULL)
 	{
 		soma = soma + (aux->v * pow(valor, i));
-		i = i + 1;
+		aux = aux->next;
+		i = i - 1;
 	}
 
 	return soma;
 }
 
-float riemann (funcao* f, float inicio, float fim, int divisoes, bool a)
+float riemann (funcao* f, float inicio, float fim, int divisoes, bool a, int n)
 {
 	float soma = 0;
-	float largura = (fim - inicio)/divisões;
+	float largura = (fim - inicio)/divisoes;
 	float x, y;
 	
 	if (a)
@@ -55,9 +58,9 @@ float riemann (funcao* f, float inicio, float fim, int divisoes, bool a)
 	for (int i = 0; i < divisoes; i++)
 	{
 		if(a)
-			y = resposta(f, x1);
+			y = resposta(f, x, n);
 		else
-			y = resposta(f, x2);
+			y = resposta(f, y, n);
 
 		soma = soma + y * largura;
 	}
@@ -65,80 +68,70 @@ float riemann (funcao* f, float inicio, float fim, int divisoes, bool a)
 	return soma;
 }
 
-float pontomedio (funcao* f, float inicio, float fim)
+funcao* recebefuncao (int n)
 {
-	float h = fim - inicio;
-	float x = (inicio + fim)/2;
+	funcao* f = NULL;
+	float valor;
 
-	return (h * resposta(f, x));
-}
-
-float trapezio (funcao* f, float inicio, float fim, int intervalos)
-{
-	float soma = 0;
-	float h = (fim - inicio);
-	float largura = (fim - inicio)/intervalos;
-	float x = inicio;
-
-	for (int i = 0; i < intervalos; i++)
+	for (int i = n; i > 0; i--)
 	{
-		soma = soma + ((h/intervalos) * (resposta(f, x) + resposta(f, x + largura)));
-		x = x + largura;
+		printf("Informe o termo de x^%d: ", i);
+		scanf("%f", &valor);
+		fflush(stdin);
+		f = add(f, valor);
 	}
 
-	return soma;
+	printf("Informe o termo independente: ");
+	scanf("%f", &valor);
+	fflush(stdin);
+	f = add(f, valor);
+
+	return f;
 }
 
-float simpson (funcao *f, float inicio, float fim, int intervalos)
+void printafuncao (funcao* f, int n)
 {
-	float h = (fim - inicio)/2;
-	float x2 = (inicio + fim)/2;
-	float largura = (fim - inicio)/intervalos;
-	float soma = 0;
-
-	float x1 = inicio;
-	float x2 = x1 + largura;
-
-
-	for (int i = 0; i < intervalos; i++)
+	funcao* aux = f;
+	for (int i = n; i > 0; i--)
 	{
-		soma = soma + ((resposta(f, x1) + 4 * resposta((x1 + x2)/2) + resposta(f, x2))/(3*intervalos));
-		x1 = x2;
-		x2 = x2 + largura;
+		printf("%.2fx^%d + ", aux->v,i);
+		aux = aux->next;
 	}
 
-	return (soma * h);
+	printf(" %.2f\n\n", aux->v);
 }
 
-float quadratura (funcao *f)
+int main ()
 {
-	int n;
-	int pontos[10];
-	float matriz[10][10];
-	float results[10];
+	funcao *f;
+	int n, div, lado;
+	float x1, x2, area;
 
-	float x;
-
-	printf("Quantos pontos (maximo 10)? ");
+	printf("Informe a ordem da função linear (n): ");
 	scanf("%d", &n);
 	fflush(stdin);
 
-	for (int i = 0; i < n; i++)
-	{
-		printf("Insira o ponto %d: ", i);
-		scanf("%f", &x);
-		pontos = add(f, x);
-	}
+	f = recebefuncao(n);
+	printf("\nFuncao: ");
+	printafuncao(f, n);
+	
+	printf("Digite o ponto inicial: ");
+	scanf("%f", &x1);
+	fflush(stdin);
+	printf("Digite o ponto final: ");
+	scanf("%f", &x2);
+	fflush(stdin);
+	printf("Número de divisoes desejadas: ");
+	scanf("%d", &div);
+	fflush(stdin);
+	printf("Ler a direita (0) ou a esquerda (1)? ");
+	scanf("%d", &lado);
+	fflush(stdin);
 
-	float h = pontos[n-1] - pontos[0];
+	area = riemann(f, x1, x2, div, lado, n);
 
-	for (int i = 0; i < n; i++)
-		for (int j = 0; j < n; j++)
-		{
-			matriz[i][j] = pow(pontos[j], i);
-			results[i] = 1/(i+1);
-		}
+	printf("\n\nO valor da area e %.2f", area);
 
 
+	return 0;
 }
-
