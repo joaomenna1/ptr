@@ -2,42 +2,37 @@
 #define MATRIX_H
 
 struct Matrix;
-typedef struct Matrix *Matrix;
+typedef struct Matrix *matriz;
 
-/*(NOTE): Matrix they must contain the same dimension */
 
-/* returns the sum of two matrices. */
-Matrix matrix_sum(Matrix matrix1, Matrix matrix2, char *name);
-/* Returns the difference of two matrices. */
-Matrix matrix_difference(Matrix matrix1, Matrix matrix2, char *name);
-/* Returns the product of two matrices. */
-Matrix matrix_product(Matrix matrix1, Matrix matrix2, char *name);
-/* Returns an array with the result of the sum of a scalar on all elements of the passed array. */
-Matrix matrix_by_scalar_sum(Matrix matrix, double scalar,char *name);
-/*Returns an array with the dot product result of the array and the value passed.*/
-Matrix matrix_by_scalar_product(Matrix matrix, double scalar, char *name);
-/* Returns an array with the result of the difference of a scalar on all elements of the passed array. */
-Matrix matrix_by_scalar_difference(Matrix matrix, double scalar,char *name);
-/* Returns the transposed matrix */
-Matrix matrix_transposed(Matrix matrix, char *name);
-/* Returns the determinant of the matrix. */
-double matrix_determinant(Matrix matrix);
-/* Returns the inverse of the matrix. */
-Matrix matrix_inverse(Matrix matrix, char *name);
-/*Destroy the matrix.*/
-void matrix_delete(Matrix matrix);
-/* Print matrix in terminal */
-void printm(Matrix matrix);
-/* returns An array of zeros. */
-Matrix matrix_empty(int a, int b,char *name);
-/*Returns the cofactor associated with the ab element of the array*/
-double matrix_cofactor_by_associated_a_matrix(Matrix matrix, int a, int b);
-/*Returns the cofactor matrix*/
-Matrix matrix_cofactor(Matrix matrix);
-/*One returns a row and a column defined as arrays.*/
-Matrix matrix_minor_complementary(Matrix matrix, int a, int b, char *name);
-/*Allows the user to insert data into the array*/
-Matrix matrix_insert();
-/*returns a adjacent array*/
-Matrix matrix_adjacent(Matrix matrix);
+// create space for a new matrix ixj
+matriz* aloca(int i, int j)
+// print a given matrix
+void printamatriz(matriz* A)
+// Returns the transposed matrix
+matriz* transposta(matriz* A)
+// return a reduced matrix (-1,-1)
+matriz* reduz(matriz* m, int l, int r)
+// calculates matrix determinant
+matriz* determinante(matriz* m, int tam)
+// add or subtract two matrices
+matriz* adicao(matriz* A, matriz* B, bool x)
+//  Returns the product of two matrices
+matriz* multiplica(matriz* A, matriz* B)
+// Returns an array with the result of the sum or difference of a scalar on all elements of the passed array
+matriz* adicaoescalar(matriz* A, float escalar, bool x)
+// Returns an array with the dot product result of the array and the value passed
+matriz* multiplicaescalar(matriz* A, float escalar)
+// Returns the inverse of the matrix
+matriz* inversao(matriz* m)
+// Receive input elements of a Matrix
+matriz* lematriz(int x, int y)
+// aux function to add/subtract
+matriz* adsub(bool operacao)
+// aux function to multiply 2 matrices
+matriz* mult()
+// aux function to add/subtract/multiply an matrix to a escalar
+matriz* escalar(int a)
+// aux function to transpose or inverse a matrix or calculate its determinant
+matriz* transpinversa(int a)
 #endif

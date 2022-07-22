@@ -21,12 +21,26 @@ matriz* aloca(int i, int j)
 }
 
 
+void printamatriz(matriz* A)
+{
+	for (int i = 0; i < A->line; i++)
+	{
+		for (int j = 0; j < A->row; j++)
+			printf("%.2f ", A->M[i][j]);
+
+		printf("\n");
+	}
+
+	fflush(stdin);
+}
+
+
 matriz* transposta(matriz* A)
 {
-	matriz* m = aloca(A->line, A->row);
+	matriz* m = aloca(A->row, A->line);
 
-	for (int i = 0; i < A->line; i++)
-		for (int j = 0; j < A->row; j++)
+	for (int i = 0; i < A->row; i++)
+		for (int j = 0; j < A->line; j++)
 			m->M[i][j] = A->M[j][i];
 
 	return m;
@@ -41,6 +55,7 @@ matriz* reduz(matriz* m, int l, int r)
 	varx = vary = 0;
 
 	for (int i = 0; i < A->line; i++)
+	{
 		for (int j = 0; j < A->row; j++)
 		{
 			if (l == i)
@@ -51,68 +66,36 @@ matriz* reduz(matriz* m, int l, int r)
 
 			A->M[i][j] = m->M[i+varx][j+vary];
 		}
+		vary = 0;
+	}
 
 	return A;
 }
 
 matriz* determinante(matriz* m, int tam)
 {	
-	if (tam = 1)
+	if (tam == 1)
 		return m;
 	
-	if(tam = 2)
+	if(tam == 2)
 	{
 		matriz* new = aloca(1,1);
-		new->M[0][0] = (m->M[0][0] * m->M[1][1] - m->M[0][1] * m->M[1][0]);
+		new->M[0][0] = ((m->M[0][0] * m->M[1][1]) - (m->M[0][1] * m->M[1][0]));
 		return new;
 	}
 
 	matriz* B;
-	if (tam > 3)
-	{
-		int soma = 0;
-		for (int i = 0; i < m->line; i++)
-		{
-			for (int j = 0; j < m->row; j++)
-			{
-				B = reduz(m, i, j);
-				soma = soma + pow(-1, i+j) * determinante(B, B->line)->M[0][0];
-			}
-		}
-		free (B);
-		matriz* A = aloca(1,1);
-		A->M[0][0] = soma;
-		return A;
-	}
-	
-	float d;
-	float D = 0;
-	tam = m->line;
 
-	for (int a = 0; a < tam; a++)
+	float soma = 0;
+	for (int i = 0; i < m->line; i++)
 	{
-		d = m->M[a][0];
-		for(int j = 1; j < tam; j++)
-		{
-			if (a + j < tam)
-				d = d + d*m->M[a+j][j];
-			else
-				d = d + d*m->M[a+j-tam][j];
-		}
+		B = reduz(m, 0, i);
+		soma = soma + (m->M[0][i] * pow(-1, i) * determinante(B, B->line)->M[0][0]);
+		free(B);
 	}
-	D = D + d;
-
-	for (int a = 0; a < tam; a++)
-	{
-		d = m->M[a][tam];
-		for(int j = tam-1; j >= 0; j--)
-			d = d + d*m->M[tam-j][j];
-	}
-	D = D + d;
-
-	matriz* new = aloca(1, 1);
-	new->M[0][0] = D;
-	return new;
+	matriz* A = aloca(1,1);
+	A->M[0][0] = soma;
+	return A;
 }
 
 matriz* adicao(matriz* A, matriz* B, bool x)
@@ -135,20 +118,17 @@ matriz* multiplica(matriz* A, matriz* B)
 	if(A->row != B->line)
 		return NULL;
 
-
 	matriz* m = aloca(A->line, B->row);
 
 
-	for (int i = 0; i < B->row; i++)
-	{
-		int soma = 0;
+	for (int i = 0; i < A->line; i++)
 		for (int j = 0; j < B->row; j++)
 		{
+			float soma = 0;
 			for (int x = 0; x < B->line; x++)
 				soma = soma + A->M[i][x] * B->M[x][j];
 			m->M[i][j] = soma;
 		}
-	}
 
 	return m;
 }
@@ -174,6 +154,8 @@ matriz* multiplicaescalar(matriz* A, float escalar)
 	for (int i = 0; i < A->line; i++)
 		for (int j = 0; j < A->row; j++)
 			m->M[i][j] = A->M[i][j] * escalar;
+
+	return m;
 }
 
 matriz* inversao(matriz* m)
@@ -206,17 +188,6 @@ matriz* lematriz(int x, int y)
 
 	printf("\n\n");
 	return A;
-}
-
-void printamatriz(matriz* A)
-{
-	for (int i = 0; i < A->line; i++)
-	{
-		for (int j = 0; j < A->row; j++)
-			printf("%.2f ", A->M[i][j]);
-
-		printf("\n");
-	}
 }
 
 matriz* adsub(bool operacao)
@@ -253,11 +224,12 @@ matriz* mult()
 		printf("Inválido");
 		return NULL;
 	}
-	printf("Insira a Matriz 1:\n");
+	printf("Insira a Matriz A:\n");
 	A = lematriz(x, y);
 	printf("Número de colunas das Matriz B: ");
-	scanf("%d", &y);
-	B = lematriz(x, y);
+	scanf("%d", &x);
+	printf("Insira a Matriz B:\n");
+	B = lematriz(y, x);
 
 	return multiplica(A, B);
 }
@@ -276,6 +248,9 @@ matriz* escalar(int a)
 		printf("Inválido");
 		return NULL;
 	}
+
+	printf("Informa a Matriz:\n");
+	A = lematriz(x, y);
 
 	printf("\nInforme o escalar: ");
 	scanf("%f", &esc);
@@ -301,13 +276,22 @@ matriz* transpinversa(int a)
 	float esc;
 	printf("Número de linhas das Matrizes: ");
 	scanf("%d", &x);
-	printf("Número de colunas das Matrizes: ");
-	scanf("%d", &y);
+	if (a == 1)
+	{
+		printf("Número de colunas das Matrizes: ");
+		scanf("%d", &y);
+	}
+	else
+		y = x;
+
 	if(x < 1 || y < 1)
 	{
 		printf("Inválido");
 		return NULL;
 	}
+
+	printf("Informe a Matriz:\n");
+	A = lematriz(x, y);
 
 	switch(a)
 	{
@@ -315,14 +299,10 @@ matriz* transpinversa(int a)
 			return transposta(A);
 
 		case 2:
-			if(x == y)
-				return determinante(A, x);
-			return NULL;
+			return determinante(A, x);
 
 		case 3:
-			if(x == y)
-				return inversao(A);
-			return NULL;
+			return inversao(A);
 	}
 }
 
@@ -404,6 +384,8 @@ int main()
 					printamatriz(A);
 					free(A);
 				}
+				else
+					printf("FOINULL");
 				break;
 
 
@@ -411,7 +393,7 @@ int main()
 				A = transpinversa(2);
 				if (A != NULL)
 				{
-					printf("O determinante eh: %.2f", &A->M[0][0]);
+					printf("O determinante eh: %.2f", A->M[0][0]);
 					free(A);
 				}
 				break;
